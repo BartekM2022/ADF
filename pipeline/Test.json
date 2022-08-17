@@ -19,7 +19,7 @@
 				}
 			},
 			{
-				"name": "Data flow1",
+				"name": "Flow 1",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
