@@ -5,7 +5,7 @@
 		"typeProperties": {
 			"sources": [
 				{
-					"name": "AzureBlob1"
+					"name": "SourceAzureBlob1"
 				}
 			],
 			"sinks": [],
