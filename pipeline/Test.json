@@ -19,7 +19,7 @@
 				}
 			},
 			{
-				"name": "Flow 1",
+				"name": "Przeplyw",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
