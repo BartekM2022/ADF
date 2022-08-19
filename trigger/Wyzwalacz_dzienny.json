@@ -1,7 +1,7 @@
 {
 	"name": "Wyzwalacz_dzienny",
 	"properties": {
-		"description": "Dzienny wyzwalacz o 8:30 i 17:30",
+		"description": "Dzienny wyzwalacz o 8:35 i 17:35",
 		"annotations": [],
 		"runtimeState": "Stopped",
 		"pipelines": [
