@@ -5,13 +5,13 @@
 		"typeProperties": {
 			"sources": [
 				{
-					"name": "source1"
+					"name": "AzureBlob1"
 				}
 			],
 			"sinks": [],
 			"transformations": [
 				{
-					"name": "union1"
+					"name": "unionBlobSQL"
 				},
 				{
 					"name": "lookup1"
@@ -28,9 +28,9 @@
 			],
 			"scriptLines": [
 				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source1",
-				"source1 union(byName: true)~> union1",
-				"union1 lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     validateSchema: false) ~> AzureBlob1",
+				"AzureBlob1 union(byName: true)~> unionBlobSQL",
+				"unionBlobSQL lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup1",
@@ -42,7 +42,7 @@
 				"join1 select(skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"select1 rank(asc(ERROR_FUNCTION(''), true),",
-				"     output({undefined} as long)) ~> rank1"
+				"     output(undefined as long)) ~> rank1"
 			]
 		}
 	}
