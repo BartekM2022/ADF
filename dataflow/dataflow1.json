@@ -1,0 +1,43 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "source1"
+				},
+				{
+					"name": "source2"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "New"
+				},
+				{
+					"name": "Delete"
+				},
+				{
+					"name": "Update"
+				}
+			],
+			"scriptLines": [
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> source1",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> source2",
+				"source1, source2 exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     negate:true,",
+				"     broadcast: 'auto')~> New",
+				"source1, source2 exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     negate:true,",
+				"     broadcast: 'auto')~> Delete",
+				"source1, source2 exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     negate:false,",
+				"     broadcast: 'auto')~> Update"
+			]
+		}
+	}
+}
