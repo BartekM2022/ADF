@@ -1,0 +1,9 @@
+{
+	"name": "bartekadfv2test",
+	"location": "northeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "cc4874c0-1586-41d8-ada3-256a30e339eb",
+		"tenantId": "d117bd16-dc78-45b4-aa94-96fd5c22b163"
+	}
+}
