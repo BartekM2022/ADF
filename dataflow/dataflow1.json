@@ -5,10 +5,10 @@
 		"typeProperties": {
 			"sources": [
 				{
-					"name": "source1"
+					"name": "Inventory"
 				},
 				{
-					"name": "source2"
+					"name": "Staging"
 				}
 			],
 			"sinks": [],
@@ -25,16 +25,16 @@
 			],
 			"scriptLines": [
 				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source1",
+				"     validateSchema: false) ~> Inventory",
 				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source2",
-				"source1, source2 exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     validateSchema: false) ~> Staging",
+				"Inventory, Staging exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
 				"     negate:true,",
 				"     broadcast: 'auto')~> New",
-				"source1, source2 exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"Inventory, Staging exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
 				"     negate:true,",
 				"     broadcast: 'auto')~> Delete",
-				"source1, source2 exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"Inventory, Staging exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
 				"     negate:false,",
 				"     broadcast: 'auto')~> Update"
 			]
