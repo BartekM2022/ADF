@@ -29,6 +29,12 @@
 				},
 				{
 					"name": "Update"
+				},
+				{
+					"name": "SetUpdateToAllRows"
+				},
+				{
+					"name": "SelectColumns"
 				}
 			],
 			"scriptLines": [
@@ -60,7 +66,15 @@
 				"     broadcast: 'auto')~> Delete",
 				"Inventory, Staging exists(Inventory@Number==Staging@Number && (Inventory@Data1!=Staging@Data1 ||Inventory@Data2!=Staging@Data2),",
 				"     negate:false,",
-				"     broadcast: 'left')~> Update"
+				"     broadcast: 'left')~> Update",
+				"SelectColumns alterRow(updateIf(true())) ~> SetUpdateToAllRows",
+				"Update select(mapColumn(",
+				"          Number,",
+				"          Data1,",
+				"          Data2",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectColumns"
 			]
 		}
 	}
