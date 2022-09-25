@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "Functions",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -12,10 +12,17 @@
 					"name": "EmpTran"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "Rank"
+				},
+				{
+					"name": "OnlyTop3"
 				}
 			],
 			"scriptLines": [
@@ -30,7 +37,12 @@
 				"     format: 'table') ~> EmpTran",
 				"EmpTran window(over(Department),",
 				"     desc(Amount, true),",
-				"     Amount = rank()) ~> Rank"
+				"     RankNumber = rank()) ~> Rank",
+				"Rank filter(RankNumber < 4) ~> OnlyTop3",
+				"OnlyTop3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
