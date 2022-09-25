@@ -19,7 +19,15 @@
 					"name": "Staging"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Inventory",
+						"type": "DatasetReference"
+					},
+					"name": "InventorySink"
+				}
+			],
 			"transformations": [
 				{
 					"name": "New"
@@ -74,7 +82,24 @@
 				"          Data2",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> SelectColumns"
+				"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+				"SetUpdateToAllRows sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ID as integer,",
+				"          Number as integer,",
+				"          Data1 as string,",
+				"          Data2 as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['Number'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> InventorySink"
 			]
 		}
 	}
