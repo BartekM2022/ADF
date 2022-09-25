@@ -5,6 +5,10 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "Inventory",
+						"type": "DatasetReference"
+					},
 					"name": "Inventory"
 				},
 				{
@@ -24,8 +28,16 @@
 				}
 			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> Inventory",
+				"source(output(",
+				"          ID as integer,",
+				"          Number as integer,",
+				"          Data1 as string,",
+				"          Data2 as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> Inventory",
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false) ~> Staging",
 				"Inventory, Staging exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
