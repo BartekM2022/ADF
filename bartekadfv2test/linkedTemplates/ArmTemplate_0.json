@@ -159,6 +159,20 @@
 								"type": "DatasetReference"
 							},
 							"name": "InventorySink"
+						},
+						{
+							"dataset": {
+								"referenceName": "Inventory",
+								"type": "DatasetReference"
+							},
+							"name": "InventorySinkInsert"
+						},
+						{
+							"dataset": {
+								"referenceName": "Inventory",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
 						}
 					],
 					"transformations": [
@@ -167,6 +181,15 @@
 						},
 						{
 							"name": "SetUpdateToAllRows"
+						},
+						{
+							"name": "Instert"
+						},
+						{
+							"name": "Delete"
+						},
+						{
+							"name": "DeleteRows"
 						}
 					],
 					"scriptLines": [
@@ -192,6 +215,13 @@
 						"     negate:false,",
 						"     broadcast: 'left')~> Update",
 						"Update alterRow(updateIf(true())) ~> SetUpdateToAllRows",
+						"Staging, Inventory exists(Staging@ID == Inventory@ID,",
+						"     negate:true,",
+						"     broadcast: 'auto')~> Instert",
+						"Inventory, Staging exists(Inventory@ID == Staging@ID,",
+						"     negate:true,",
+						"     broadcast: 'auto')~> Delete",
+						"Delete alterRow(deleteIf(true())) ~> DeleteRows",
 						"SetUpdateToAllRows sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     input(",
@@ -207,7 +237,38 @@
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> InventorySink"
+						"     errorHandlingOption: 'stopOnFirstError') ~> InventorySink",
+						"Instert sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          ID as integer,",
+						"          Data1 as string,",
+						"          Data2 as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> InventorySinkInsert",
+						"DeleteRows sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          ID as integer,",
+						"          Data1 as string,",
+						"          Data2 as string",
+						"     ),",
+						"     deletable:true,",
+						"     insertable:false,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     keys:['ID'],",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
 					]
 				}
 			},
@@ -242,7 +303,9 @@
 								"datasetParameters": {
 									"Staging": {},
 									"Inventory": {},
-									"InventorySink": {}
+									"InventorySink": {},
+									"InventorySinkInsert": {},
+									"sink1": {}
 								}
 							},
 							"staging": {},
