@@ -67,6 +67,90 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Functions')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Functions",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Functions",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"EmpTran": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/Functions')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EmpTran')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ShopDWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "EmployeeNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Department",
+						"type": "varchar"
+					},
+					{
+						"name": "Amount",
+						"type": "money",
+						"precision": 19,
+						"scale": 4
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "EmpTran"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ShopDWH')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Inventory')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -130,6 +214,43 @@
 				"typeProperties": {
 					"schema": "dbo",
 					"table": "Staging"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ShopDWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Top3')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ShopDWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "EmpNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Depart",
+						"type": "varchar"
+					},
+					{
+						"name": "Amount",
+						"type": "money",
+						"precision": 19,
+						"scale": 4
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Top3"
 				}
 			},
 			"dependsOn": [
@@ -325,6 +446,81 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Staging')]",
 				"[concat(variables('factoryId'), '/datasets/Inventory')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Functions')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "EmpTran",
+								"type": "DatasetReference"
+							},
+							"name": "EmpTran"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Top3",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Rank"
+						},
+						{
+							"name": "OnlyTop3"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          EmployeeNumber as integer,",
+						"          Department as string,",
+						"          Amount as decimal(19,4)",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> EmpTran",
+						"EmpTran window(over(Department),",
+						"     desc(Amount, true),",
+						"     RankNumber = rank()) ~> Rank",
+						"Rank filter(RankNumber < 4) ~> OnlyTop3",
+						"OnlyTop3 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          EmpNumber as integer,",
+						"          Depart as string,",
+						"          Amount as decimal(19,4)",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          EmpNumber = EmployeeNumber,",
+						"          Depart = Department,",
+						"          Amount",
+						"     )) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/EmpTran')]",
+				"[concat(variables('factoryId'), '/datasets/Top3')]"
 			]
 		}
 	]
