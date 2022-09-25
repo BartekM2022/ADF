@@ -1,0 +1,291 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "bartekadfv2test"
+		},
+		"ShopDWH_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ShopDWH'"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Wyzwalacz_dzienny')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Dzienny wyzwalacz o 8:39 i 17:39",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-08-19T12:51:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								39
+							],
+							"hours": [
+								8,
+								17
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DeltaLoad')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "Inventory",
+								"type": "DatasetReference"
+							},
+							"name": "Inventory"
+						},
+						{
+							"dataset": {
+								"referenceName": "Staging",
+								"type": "DatasetReference"
+							},
+							"name": "Staging"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Inventory",
+								"type": "DatasetReference"
+							},
+							"name": "InventorySink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Update"
+						},
+						{
+							"name": "SetUpdateToAllRows"
+						},
+						{
+							"name": "SelectColumns"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          ID as integer,",
+						"          Number as integer,",
+						"          Data1 as string,",
+						"          Data2 as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> Inventory",
+						"source(output(",
+						"          ID as integer,",
+						"          Number as integer,",
+						"          Data1 as string,",
+						"          Data2 as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> Staging",
+						"Inventory, Staging exists(Inventory@Number==Staging@Number && (Inventory@Data1!=Staging@Data1 ||Inventory@Data2!=Staging@Data2),",
+						"     negate:false,",
+						"     broadcast: 'left')~> Update",
+						"SelectColumns alterRow(updateIf(true())) ~> SetUpdateToAllRows",
+						"Update select(mapColumn(",
+						"          Number,",
+						"          Data1,",
+						"          Data2",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+						"SetUpdateToAllRows sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          ID as integer,",
+						"          Number as integer,",
+						"          Data1 as string,",
+						"          Data2 as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:false,",
+						"     updateable:true,",
+						"     upsertable:false,",
+						"     keys:['Number'],",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> InventorySink"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Inventory')]",
+				"[concat(variables('factoryId'), '/datasets/Staging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ShopDWH')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('ShopDWH_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Inventory')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ShopDWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ID",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Number",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Data1",
+						"type": "nchar"
+					},
+					{
+						"name": "Data2",
+						"type": "nchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Inventory"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ShopDWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Staging')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ShopDWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ID",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Number",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Data1",
+						"type": "nchar"
+					},
+					{
+						"name": "Data2",
+						"type": "nchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Staging"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ShopDWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DeltaLoad')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DeltaLoad",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DeltaLoad",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"Inventory": {},
+									"Staging": {},
+									"InventorySink": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/DeltaLoad')]"
+			]
+		}
+	]
+}
