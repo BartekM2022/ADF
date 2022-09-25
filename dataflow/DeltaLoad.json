@@ -5,26 +5,14 @@
 		"typeProperties": {
 			"sources": [
 				{
-					"dataset": {
-						"referenceName": "Staging",
-						"type": "DatasetReference"
-					},
 					"name": "Staging"
 				},
 				{
-					"dataset": {
-						"referenceName": "Inventory",
-						"type": "DatasetReference"
-					},
 					"name": "Inventory"
 				}
 			],
 			"sinks": [
 				{
-					"dataset": {
-						"referenceName": "Inventory",
-						"type": "DatasetReference"
-					},
 					"name": "InventorySink"
 				}
 			],
@@ -40,26 +28,10 @@
 				}
 			],
 			"scriptLines": [
-				"source(output(",
-				"          ID as integer,",
-				"          Number as integer,",
-				"          Data1 as string,",
-				"          Data2 as string",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> Staging",
-				"source(output(",
-				"          ID as integer,",
-				"          Number as integer,",
-				"          Data1 as string,",
-				"          Data2 as string",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> Inventory",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> Staging",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> Inventory",
 				"Staging, Inventory exists(Inventory@Number==Staging@Number && (Inventory@Data1!=Staging@Data1 || Inventory@Data2!=Staging@Data2),",
 				"     negate:false,",
 				"     broadcast: 'left')~> Update",
@@ -73,21 +45,8 @@
 				"     skipDuplicateMapOutputs: true) ~> SelectColumns",
 				"SetUpdateToAllRows sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     input(",
-				"          ID as integer,",
-				"          Number as integer,",
-				"          Data1 as string,",
-				"          Data2 as string",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:false,",
-				"     updateable:true,",
-				"     upsertable:false,",
-				"     keys:['Number'],",
-				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> InventorySink"
+				"     skipDuplicateMapOutputs: true) ~> InventorySink"
 			]
 		}
 	}

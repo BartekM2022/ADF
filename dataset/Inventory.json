@@ -1,0 +1,30 @@
+{
+	"name": "Inventory",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ShopDWH",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ID",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Data1",
+				"type": "nchar"
+			},
+			{
+				"name": "Data2",
+				"type": "nchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Inventory"
+		}
+	}
+}
