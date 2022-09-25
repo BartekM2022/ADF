@@ -17,6 +17,19 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/ShopDWH')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('ShopDWH_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Wyzwalacz_dzienny')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -47,19 +60,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ShopDWH')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('ShopDWH_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/Inventory')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -73,11 +73,6 @@
 				"schema": [
 					{
 						"name": "ID",
-						"type": "tinyint",
-						"precision": 3
-					},
-					{
-						"name": "Number",
 						"type": "tinyint",
 						"precision": 3
 					},
@@ -117,11 +112,6 @@
 						"precision": 3
 					},
 					{
-						"name": "Number",
-						"type": "tinyint",
-						"precision": 3
-					},
-					{
 						"name": "Data1",
 						"type": "nchar"
 					},
@@ -149,17 +139,17 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "Inventory",
-								"type": "DatasetReference"
-							},
-							"name": "Inventory"
-						},
-						{
-							"dataset": {
 								"referenceName": "Staging",
 								"type": "DatasetReference"
 							},
 							"name": "Staging"
+						},
+						{
+							"dataset": {
+								"referenceName": "Inventory",
+								"type": "DatasetReference"
+							},
+							"name": "Inventory"
 						}
 					],
 					"sinks": [
@@ -177,25 +167,11 @@
 						},
 						{
 							"name": "SetUpdateToAllRows"
-						},
-						{
-							"name": "SelectColumns"
 						}
 					],
 					"scriptLines": [
 						"source(output(",
 						"          ID as integer,",
-						"          Number as integer,",
-						"          Data1 as string,",
-						"          Data2 as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> Inventory",
-						"source(output(",
-						"          ID as integer,",
-						"          Number as integer,",
 						"          Data1 as string,",
 						"          Data2 as string",
 						"     ),",
@@ -203,22 +179,23 @@
 						"     validateSchema: false,",
 						"     isolationLevel: 'READ_UNCOMMITTED',",
 						"     format: 'table') ~> Staging",
-						"Inventory, Staging exists(Inventory@Number==Staging@Number && (Inventory@Data1!=Staging@Data1 ||Inventory@Data2!=Staging@Data2),",
+						"source(output(",
+						"          ID as integer,",
+						"          Data1 as string,",
+						"          Data2 as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> Inventory",
+						"Staging, Inventory exists(Staging@ID==Inventory@ID && (Staging@Data1!=Inventory@Data1||Staging@Data2!=Inventory@Data2),",
 						"     negate:false,",
 						"     broadcast: 'left')~> Update",
-						"SelectColumns alterRow(updateIf(true())) ~> SetUpdateToAllRows",
-						"Update select(mapColumn(",
-						"          Number,",
-						"          Data1,",
-						"          Data2",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+						"Update alterRow(updateIf(true())) ~> SetUpdateToAllRows",
 						"SetUpdateToAllRows sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     input(",
 						"          ID as integer,",
-						"          Number as integer,",
 						"          Data1 as string,",
 						"          Data2 as string",
 						"     ),",
@@ -226,7 +203,7 @@
 						"     insertable:false,",
 						"     updateable:true,",
 						"     upsertable:false,",
-						"     keys:['Number'],",
+						"     keys:['ID'],",
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -235,8 +212,8 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Inventory')]",
-				"[concat(variables('factoryId'), '/datasets/Staging')]"
+				"[concat(variables('factoryId'), '/datasets/Staging')]",
+				"[concat(variables('factoryId'), '/datasets/Inventory')]"
 			]
 		},
 		{
@@ -263,8 +240,8 @@
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"Inventory": {},
 									"Staging": {},
+									"Inventory": {},
 									"InventorySink": {}
 								}
 							},
