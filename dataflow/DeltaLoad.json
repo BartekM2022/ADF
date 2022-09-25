@@ -21,6 +21,10 @@
 			],
 			"sinks": [
 				{
+					"dataset": {
+						"referenceName": "Inventory",
+						"type": "DatasetReference"
+					},
 					"name": "InventorySink"
 				}
 			],
@@ -30,9 +34,6 @@
 				},
 				{
 					"name": "SetUpdateToAllRows"
-				},
-				{
-					"name": "SelectColumns"
 				}
 			],
 			"scriptLines": [
@@ -54,21 +55,26 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> Inventory",
-				"Staging, Inventory exists(Inventory@ID==Staging@ID&&(Inventory@Data1==Staging@Data1||Inventory@Data2==Staging@Data2),",
+				"Staging, Inventory exists(Staging@ID==Inventory@ID && (Staging@Data1!=Inventory@Data1||Staging@Data2!=Inventory@Data2),",
 				"     negate:false,",
 				"     broadcast: 'left')~> Update",
-				"SelectColumns alterRow(updateIf(true())) ~> SetUpdateToAllRows",
-				"Update select(mapColumn(",
-				"          Number,",
-				"          Data1,",
-				"          Data2",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+				"Update alterRow(updateIf(true())) ~> SetUpdateToAllRows",
 				"SetUpdateToAllRows sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     input(",
+				"          ID as integer,",
+				"          Data1 as string,",
+				"          Data2 as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['ID'],",
+				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> InventorySink"
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> InventorySink"
 			]
 		}
 	}
