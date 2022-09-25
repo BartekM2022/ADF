@@ -30,12 +30,6 @@
 			],
 			"transformations": [
 				{
-					"name": "New"
-				},
-				{
-					"name": "Delete"
-				},
-				{
 					"name": "Update"
 				},
 				{
@@ -66,12 +60,6 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> Staging",
-				"Inventory, Staging exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
-				"     negate:true,",
-				"     broadcast: 'auto')~> New",
-				"Inventory, Staging exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
-				"     negate:true,",
-				"     broadcast: 'auto')~> Delete",
 				"Inventory, Staging exists(Inventory@Number==Staging@Number && (Inventory@Data1!=Staging@Data1 ||Inventory@Data2!=Staging@Data2),",
 				"     negate:false,",
 				"     broadcast: 'left')~> Update",
