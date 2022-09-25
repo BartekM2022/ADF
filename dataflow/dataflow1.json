@@ -1,0 +1,37 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "EmpTran",
+						"type": "DatasetReference"
+					},
+					"name": "EmpTran"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "Rank"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EmployeeNumber as integer,",
+				"          Department as string,",
+				"          Amount as decimal(19,4)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> EmpTran",
+				"EmpTran window(over(Department),",
+				"     desc(Amount, true),",
+				"     Amount = rank()) ~> Rank"
+			]
+		}
+	}
+}
