@@ -6,17 +6,17 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "Inventory",
-						"type": "DatasetReference"
-					},
-					"name": "Inventory"
-				},
-				{
-					"dataset": {
 						"referenceName": "Staging",
 						"type": "DatasetReference"
 					},
 					"name": "Staging"
+				},
+				{
+					"dataset": {
+						"referenceName": "Inventory",
+						"type": "DatasetReference"
+					},
+					"name": "Inventory"
 				}
 			],
 			"sinks": [
@@ -49,7 +49,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> Inventory",
+				"     format: 'table') ~> Staging",
 				"source(output(",
 				"          ID as integer,",
 				"          Number as integer,",
@@ -59,8 +59,8 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> Staging",
-				"Inventory, Staging exists(Inventory@Number==Staging@Number && (Inventory@Data1!=Staging@Data1),",
+				"     format: 'table') ~> Inventory",
+				"Staging, Inventory exists(Inventory@Number==Staging@Number && (Inventory@Data1!=Staging@Data1 || Inventory@Data2!=Staging@Data2),",
 				"     negate:false,",
 				"     broadcast: 'left')~> Update",
 				"SelectColumns alterRow(updateIf(true())) ~> SetUpdateToAllRows",
