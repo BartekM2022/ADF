@@ -54,7 +54,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> Inventory",
-				"Staging, Inventory exists(Inventory@Number == Staging@Number,",
+				"Staging, Inventory exists(Inventory@ID==Staging@ID&&(Inventory@Data1==Staging@Data1||Inventory@Data2==Staging@Data2),",
 				"     negate:false,",
 				"     broadcast: 'left')~> Update",
 				"SelectColumns alterRow(updateIf(true())) ~> SetUpdateToAllRows",
