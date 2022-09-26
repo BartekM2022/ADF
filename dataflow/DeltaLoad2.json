@@ -1,0 +1,57 @@
+{
+	"name": "DeltaLoad2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "StagingDelta",
+						"type": "DatasetReference"
+					},
+					"name": "StagingDelta"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "InventoryDelta",
+						"type": "DatasetReference"
+					},
+					"name": "InventoryDelta"
+				}
+			],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          ID as integer,",
+				"          Data as string,",
+				"          {_incrementalDate} as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     enableCdc: true,",
+				"     mode: 'read',",
+				"     skipInitialLoad: false,",
+				"     waterMarkColumn: '_incrementalDate',",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> StagingDelta",
+				"StagingDelta sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ID as integer,",
+				"          Data as string,",
+				"          {_incrementalDate} as timestamp",
+				"     ),",
+				"     deletable:true,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> InventoryDelta"
+			]
+		}
+	}
+}
