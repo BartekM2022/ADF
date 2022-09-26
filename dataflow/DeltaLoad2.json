@@ -47,6 +47,7 @@
 				"     insertable:true,",
 				"     updateable:true,",
 				"     upsertable:true,",
+				"     keys:['ID'],",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
