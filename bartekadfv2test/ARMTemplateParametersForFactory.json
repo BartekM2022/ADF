@@ -7,6 +7,12 @@
 		},
 		"ShopDWH_connectionString": {
 			"value": ""
+		},
+		"AzureStorageLinkedService_accountKey": {
+			"value": ""
+		},
+		"AzureStorageLinkedService_properties_typeProperties_url": {
+			"value": "https://reportingdlbartek.dfs.core.windows.net/"
 		}
 	}
 }
