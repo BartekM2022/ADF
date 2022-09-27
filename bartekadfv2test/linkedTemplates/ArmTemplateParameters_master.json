@@ -5,13 +5,22 @@
 		"factoryName": {
 			"value": "bartekadfv2test"
 		},
-		"ShopDWH_connectionString": {
-			"value": ""
-		},
 		"AzureStorageLinkedService_accountKey": {
 			"value": ""
 		},
+		"ShopDWH_connectionString": {
+			"value": ""
+		},
+		"ls_ablob_covidreportingsa_connectionString": {
+			"value": ""
+		},
+		"ls_adls_covidreportingdl_accountKey": {
+			"value": ""
+		},
 		"AzureStorageLinkedService_properties_typeProperties_url": {
+			"value": "https://reportingdlbartek.dfs.core.windows.net/"
+		},
+		"ls_adls_covidreportingdl_properties_typeProperties_url": {
 			"value": "https://reportingdlbartek.dfs.core.windows.net/"
 		},
 		"containerUri": {
