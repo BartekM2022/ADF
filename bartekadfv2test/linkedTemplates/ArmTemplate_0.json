@@ -67,36 +67,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Wyzwalacz_dzienny')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "Dzienny wyzwalacz o 8:39 i 17:39",
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2022-08-19T12:51:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								39
-							],
-							"hours": [
-								8,
-								17
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/ls_ablob_covidreportingsa')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -121,6 +91,36 @@
 					"accountKey": {
 						"type": "SecureString",
 						"value": "[parameters('ls_adls_covidreportingdl_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Wyzwalacz_dzienny')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Dzienny wyzwalacz o 8:39 i 17:39",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-08-19T12:51:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								39
+							],
+							"hours": [
+								8,
+								17
+							]
+						}
 					}
 				}
 			},
@@ -483,6 +483,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": "polulation_by_age_tsv.csv",
+						"folderPath": "population",
 						"fileSystem": "raw"
 					},
 					"columnDelimiter": "\t",
@@ -614,6 +615,196 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/CDCCustomers')]",
 				"[concat(variables('factoryId'), '/datasets/CustomersCSV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_ingest_population_data')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Check if file exists",
+						"type": "Validation",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_population_raw_gz",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"timeout": "0.00:02:00",
+							"sleep": 10,
+							"minimumSize": 1024
+						}
+					},
+					{
+						"name": "Get File Metadata",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Check if file exists",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_population_raw_gz",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"exists",
+								"size",
+								"columnCount"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"modifiedDatetimeStart": "2022-09-27T00:00:00.004Z",
+								"modifiedDatetimeEnd": "2022-09-27T00:00:00.427Z",
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "If Column Count Matches",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Get File Metadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('Get File Metadata').output.columnCount,13)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Copy Population Data",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_population_raw_gz",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_population_raw_tsv",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								},
+								{
+									"name": "Delete Source File",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "Copy Population Data",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ds_population_raw_gz",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_population_raw_gz')]",
+				"[concat(variables('factoryId'), '/datasets/ds_population_raw_tsv')]"
 			]
 		},
 		{
@@ -887,53 +1078,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/DeltaLoad')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Functions')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Functions",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Functions",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"EmpTran": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/Functions')]"
 			]
 		}
 	]
