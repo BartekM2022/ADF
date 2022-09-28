@@ -1,0 +1,27 @@
+{
+	"name": "Wyzwalacz_dzienny",
+	"properties": {
+		"description": "Dzienny wyzwalacz o 8:39 i 17:39",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-08-19T12:51:00Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						39
+					],
+					"hours": [
+						8,
+						17
+					]
+				}
+			}
+		}
+	}
+}
