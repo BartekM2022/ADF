@@ -60,5 +60,6 @@
 			"schema": "cdc",
 			"table": "dbo_customers_CT"
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }
