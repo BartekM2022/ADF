@@ -26,7 +26,22 @@
 					"name": "DimDateSource"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_processed_hospital_admision_weekly",
+						"type": "DatasetReference"
+					},
+					"name": "WeeklySink"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_processed_hospital_admision_daily",
+						"type": "DatasetReference"
+					},
+					"name": "DailySink"
+				}
+			],
 			"transformations": [
 				{
 					"name": "SelectReqdFields"
@@ -159,7 +174,23 @@
 				"     columnNaming: '$V_$N',",
 				"     lateral: true) ~> PivotDaily",
 				"PivotWeekly sort(desc(reported_year_week, true),",
-				"     asc(country, true)) ~> SortWeekly"
+				"     asc(country, true)) ~> SortWeekly",
+				"SortWeekly sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> WeeklySink",
+				"PivotDaily sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> DailySink"
 			]
 		}
 	}
