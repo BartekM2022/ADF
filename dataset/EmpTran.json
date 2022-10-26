@@ -1,0 +1,33 @@
+{
+	"name": "EmpTran",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ShopDWH",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "EmployeeNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Department",
+				"type": "varchar"
+			},
+			{
+				"name": "Amount",
+				"type": "money",
+				"precision": 19,
+				"scale": 4
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "EmpTran"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
