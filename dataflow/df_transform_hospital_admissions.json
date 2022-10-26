@@ -20,7 +20,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "ds_country_lookup",
+						"referenceName": "ds_date_dim_lookup",
 						"type": "DatasetReference"
 					},
 					"name": "DimDateSource"
@@ -98,11 +98,18 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> CountrySource",
 				"source(output(",
-				"          country as string,",
-				"          country_code_2_digit as string,",
-				"          country_code_3_digit as string,",
-				"          continent as string,",
-				"          population as string",
+				"          date_key as string,",
+				"          date as string,",
+				"          year as string,",
+				"          month as string,",
+				"          day as string,",
+				"          day_name as string,",
+				"          day_of_year as string,",
+				"          week_of_month as string,",
+				"          week_of_year as string,",
+				"          month_name as string,",
+				"          year_month as string,",
+				"          year_week as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
