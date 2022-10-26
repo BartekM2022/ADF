@@ -80,7 +80,7 @@
 				"          indicator as string,",
 				"          date as string,",
 				"          year_week as string,",
-				"          value as string,",
+				"          value as double,",
 				"          source as string,",
 				"          url as string",
 				"     ),",
