@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "TestCopyData",
+				"name": "Test_Copy_Data",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -19,7 +19,7 @@
 				}
 			},
 			{
-				"name": "TestDataFlow",
+				"name": "Test_Data_Flow",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
