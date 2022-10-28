@@ -27,6 +27,9 @@
 				},
 				{
 					"name": "MaxCount"
+				},
+				{
+					"name": "SortByCountry"
 				}
 			],
 			"scriptLines": [
@@ -54,7 +57,8 @@
 				"SelectColumnsForAgregation aggregate(groupBy(country,",
 				"          indicator),",
 				"     {Max Per Country} = max(daily_count)) ~> MaxCount",
-				"MaxCount sink(allowSchemaDrift: true,",
+				"MaxCount sort(asc(country, true)) ~> SortByCountry",
+				"SortByCountry sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     umask: 0022,",
 				"     preCommands: [],",
