@@ -1,0 +1,20 @@
+{
+	"name": "MaxPerCountry",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adls_covidreportingdl",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "max_percountry.json",
+				"folderPath": "ecdc/max_per_country",
+				"fileSystem": "processed"
+			}
+		},
+		"schema": {}
+	}
+}

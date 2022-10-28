@@ -12,7 +12,15 @@
 					"name": "RawDataSource"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "MaxPerCountry",
+						"type": "DatasetReference"
+					},
+					"name": "TransformDestination"
+				}
+			],
 			"transformations": [
 				{
 					"name": "SelectColumnsForAgregation"
@@ -45,7 +53,15 @@
 				"     skipDuplicateMapOutputs: true) ~> SelectColumnsForAgregation",
 				"SelectColumnsForAgregation aggregate(groupBy(country,",
 				"          indicator),",
-				"     {Max Per Country} = max(daily_count)) ~> MaxCount"
+				"     {Max Per Country} = max(daily_count)) ~> MaxCount",
+				"MaxCount sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> TransformDestination"
 			]
 		}
 	}
