@@ -1,0 +1,72 @@
+{
+	"name": "RawDataTranform",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_raw_cases_and_deaths",
+						"type": "DatasetReference"
+					},
+					"name": "RawDataSource"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "MaxPerCountry",
+						"type": "DatasetReference"
+					},
+					"name": "TransformDestination"
+				}
+			],
+			"transformations": [
+				{
+					"name": "SelectColumnsForAgregation"
+				},
+				{
+					"name": "MaxCount"
+				},
+				{
+					"name": "SortByCountry"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          country as string,",
+				"          country_code as string,",
+				"          continent as string,",
+				"          population as string,",
+				"          indicator as string,",
+				"          daily_count as integer,",
+				"          date as string,",
+				"          rate_14_day as string,",
+				"          source as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> RawDataSource",
+				"RawDataSource select(mapColumn(",
+				"          country,",
+				"          indicator,",
+				"          daily_count",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectColumnsForAgregation",
+				"SelectColumnsForAgregation aggregate(groupBy(country,",
+				"          indicator),",
+				"     {Max Per Country} = max(daily_count)) ~> MaxCount",
+				"MaxCount sort(asc(country, true)) ~> SortByCountry",
+				"SortByCountry sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> TransformDestination"
+			]
+		}
+	}
+}
