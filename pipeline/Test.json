@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Test",
+				"name": "TestCopyData",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -16,6 +16,26 @@
 				"userProperties": [],
 				"typeProperties": {
 					"enableStaging": false
+				}
+			},
+			{
+				"name": "TestDataFlow",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
 				}
 			}
 		],
