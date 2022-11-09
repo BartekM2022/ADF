@@ -5,19 +5,11 @@
 		"typeProperties": {
 			"sources": [
 				{
-					"dataset": {
-						"referenceName": "EmpTran",
-						"type": "DatasetReference"
-					},
 					"name": "EmpTran"
 				}
 			],
 			"sinks": [
 				{
-					"dataset": {
-						"referenceName": "Top3",
-						"type": "DatasetReference"
-					},
 					"name": "sink1"
 				}
 			],
@@ -36,33 +28,21 @@
 				"          Amount as decimal(19,4)",
 				"     ),",
 				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> EmpTran",
+				"     validateSchema: false) ~> EmpTran",
 				"EmpTran window(over(Department),",
 				"     desc(Amount, true),",
 				"     RankNumber = rank()) ~> Rank",
 				"Rank filter(RankNumber < 4) ~> OnlyTop3",
 				"OnlyTop3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     input(",
-				"          EmpNumber as integer,",
-				"          Depart as string,",
-				"          Amount as decimal(19,4)",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
 				"          EmpNumber = EmployeeNumber,",
 				"          Depart = Department,",
 				"          Amount",
-				"     )) ~> sink1"
+				"     ),",
+				"     format: 'table') ~> sink1"
 			]
 		}
 	}
