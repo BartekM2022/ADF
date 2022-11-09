@@ -114,7 +114,7 @@
 							},
 							{
 								"source": {
-									"name": "Daily hospital occupancy_count",
+									"name": "Daily ICU occupancy_count",
 									"type": "String",
 									"physicalType": "String"
 								},
