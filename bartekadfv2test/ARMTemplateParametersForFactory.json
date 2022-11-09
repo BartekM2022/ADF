@@ -20,6 +20,9 @@
 		"ls_db_covid_cluster_accessToken": {
 			"value": ""
 		},
+		"ls_sql_covid_db_connectionString": {
+			"value": ""
+		},
 		"AzureStorageLinkedService_properties_typeProperties_url": {
 			"value": "https://reportingdlbartek.dfs.core.windows.net/"
 		},
