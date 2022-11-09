@@ -5,6 +5,9 @@
 			"referenceName": "AzureStorageLinkedService",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "raw"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
