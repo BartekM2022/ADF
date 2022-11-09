@@ -11,10 +11,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'AzureStorageLinkedService'"
 		},
-		"ShopDWH_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'ShopDWH'"
-		},
 		"ls_ablob_covidreportingsa_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_ablob_covidreportingsa'"
@@ -43,7 +39,7 @@
 			"type": "string",
 			"defaultValue": "@{linkedService().baseURL}"
 		},
-		"tr_ingest_population_data_properties_typeProperties_scope": {
+		"trigger_populationa_data_arrived_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/dde21fce-86d3-4497-955b-c106ca7cae40/resourceGroups/Test/providers/Microsoft.Storage/storageAccounts/reportingsabartek"
 		},
@@ -76,9 +72,6 @@
 					},
 					"AzureStorageLinkedService_accountKey": {
 						"value": "[parameters('AzureStorageLinkedService_accountKey')]"
-					},
-					"ShopDWH_connectionString": {
-						"value": "[parameters('ShopDWH_connectionString')]"
 					},
 					"ls_ablob_covidreportingsa_connectionString": {
 						"value": "[parameters('ls_ablob_covidreportingsa_connectionString')]"
@@ -119,8 +112,8 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"tr_ingest_population_data_properties_typeProperties_scope": {
-						"value": "[parameters('tr_ingest_population_data_properties_typeProperties_scope')]"
+					"trigger_populationa_data_arrived_properties_typeProperties_scope": {
+						"value": "[parameters('trigger_populationa_data_arrived_properties_typeProperties_scope')]"
 					}
 				}
 			},
